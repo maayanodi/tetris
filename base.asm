@@ -7,6 +7,7 @@ board db 18,18,18,18,18,18,18,18,18,18,18,18, 20 dup(18,0,0,0,0,0,0,00,0,0,0,18)
 columns db 12
 x dw 160
 y dw 100
+DelayDiv dw 0000h
 
 
 CODESEG
@@ -264,6 +265,46 @@ proc DropObj
 endp DropObj
 
 
+proc Delay
+push ax
+push bx
+push cx
+push dx
+
+system_time:   
+  mov  ah, 2ch
+  int  21h
+  
+  mov  ax, dx
+  mov al, ah
+  mov ah, 0
+  mov bl, 100
+  mul bl
+  mov dh, 0
+  add ax, dx
+
+  mov dx, 0
+  mov bx, 10
+  div bx
+
+  mov dx, 0
+  mov bx, 2
+  div  bx
+  cmp  dx, 0
+  jnz  system_time
+  cmp ax, [DelayDiv]
+  jz  system_time
+
+  mov [DelayDiv], ax
+
+  pop dx
+  pop cx
+  pop bx
+  pop ax
+
+  ret
+ endp Delay
+
 
 start:	
     mov ax, @data
@@ -302,14 +343,16 @@ start:
 	push ax
 	call SetSquare
 
-		
+
+	forever:
+	call Delay
 	call CanObjFall
 	cmp ax, 1
 	jne Exit
 	call DropObj
-	call DropObj
-	call DropObj
 	call DrawBoard
+	jmp forever
+
 
 
 Exit:
