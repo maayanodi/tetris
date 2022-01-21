@@ -7,7 +7,7 @@ board db 18,18,18,18,18,18,18,18,18,18,18,18, 20 dup(18,0,0,0,0,0,0,00,0,0,0,18)
 columns db 12
 x dw 160
 y dw 100
-DelayDiv dw 0000h
+DelayDiv dw 0001h
 
 
 CODESEG
