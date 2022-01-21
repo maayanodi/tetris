@@ -7,7 +7,7 @@ board db 18,18,18,18,18,18,18,18,18,18,18,18, 20 dup(18,0,0,0,0,0,0,00,0,0,0,18)
 columns db 12
 x dw 160
 y dw 100
-DelayDiv dw 0001h
+DelayDiv dw 0000h
 
 
 CODESEG
@@ -137,9 +137,14 @@ endp DrawBoard
 proc CanSquareFall
 	push bp
 	mov bp, sp
-	mov ax, [bp+6]
+
+	push bx
+
 	mov bx, [bp+4]
-	inc bx
+	mov ax, [bp+6]
+	
+	add bx, [bp+8]
+	add ax, [bp+10]
 	push ax
 	push bx
 	call GetSquare
@@ -157,13 +162,19 @@ proc CanSquareFall
 	mov ax, 1
 	
 	CantFall:
+
+	pop bx
 	pop bp
-	ret 4
+	ret 8
 endp CanSquareFall
 
 
+proc CanObjMov
 
-proc CanObjFall
+	push bp
+	mov bp, sp
+
+	push bx
 	push cx
 	push dx
 
@@ -178,9 +189,18 @@ proc CanObjFall
 			cmp ah, 80h
 			jne SoFarSoGood
 			
+			mov bx, [bp+6]
+			push bx
+
+			mov bx, [bp+4]
+			push bx
+
 			push cx
 			push dx
 			call CanSquareFall
+			
+			Left:
+
 			cmp ax, 1
 			je SoFarSoGood
 			xor ax, ax
@@ -197,37 +217,47 @@ proc CanObjFall
 	return:
 	pop dx
 	pop cx
-	ret
-endp CanObjFall
+	pop bx
+	pop bp
+	ret 4
+endp CanObjMov
 	
 	
-proc DropSquare
+proc MovSquare
 	push bp
 	mov bp, sp
-	mov cx, [bp+6]
+	mov cx, [bp+6] 
 	mov dx, [bp+4]
+
+
+
 	push cx
 	push dx
 	call GetSquare
 	
-	inc dx
+	add cx, [bp+10] ;x
+	add dx, [bp+8] ;y
 	push cx
 	push dx
 	push ax
 	call SetSquare
 	
-	dec dx
+	sub cx, [bp+10]
+	sub dx, [bp+8]
 	xor ax, ax
 	push cx
 	push dx
 	push ax
 	call SetSquare
 	pop bp
-	ret 4
-endp DropSquare
+	ret 8
+endp MovSquare
 	
 
 proc DropObj
+	push bp
+	mov bp, sp
+
 	push cx
 	push dx
 	push bx
@@ -237,7 +267,19 @@ proc DropObj
 	Dcol:
 		mov cx, 10
 		Drow:
-			push cx
+
+		    mov bx, [bp+8]
+			cmp bx, 0
+			je ppp1
+
+			mov bx, 11
+			sub bx, cx
+			jmp ppp2
+			ppp1:
+			mov bx, cx
+		
+			ppp2:
+			push bx
 			push dx
 			call GetSquare
 			cmp ah, 80h
@@ -245,9 +287,15 @@ proc DropObj
 			jmp DontDrop
 			
 			Drop:
-			push cx
+			mov ax, [bp+6]
+			push ax
+
+			mov ax, [bp+4]
+			push ax
+
+			push bx
 			push dx
-			call DropSquare
+			call MovSquare
 
 			
 			DontDrop:
@@ -261,8 +309,79 @@ proc DropObj
 	pop bx
 	pop dx
 	pop cx
-	ret
+	pop bp
+	ret 6
 endp DropObj
+
+
+
+;move right
+
+
+proc MovSquareRight
+	push bp
+	mov bp, sp
+	mov cx, [bp+6]
+	mov dx, [bp+4]
+	push cx
+	push dx
+	call GetSquare
+	
+	inc cx
+	push cx
+	push dx
+	push ax
+	call SetSquare
+	
+	dec cx
+	xor ax, ax
+	push cx
+	push dx
+	push ax
+	call SetSquare
+	pop bp
+	ret 4
+endp MovSquareRight
+
+
+proc MovObjRight
+	push cx
+	push dx
+	push bx
+
+	
+	mov dx, 20
+	MRcol:
+		mov cx, 10
+		MRrow:
+			push cx
+			push dx
+			call GetSquare
+			cmp ah, 80h
+			je MovRight
+			jmp DontMovR
+			
+			MovRight:
+			push cx
+			push dx
+			call MovSquare
+
+			
+			DontMovR:
+			loop MRrow
+		dec dx
+		cmp dx, 0
+		jne MRcol
+
+	call DrawBoard
+	
+	pop bx
+	pop dx
+	pop cx
+	ret
+endp MovObjRight
+
+
 
 
 proc Delay
@@ -306,6 +425,8 @@ system_time:
  endp Delay
 
 
+
+
 start:	
     mov ax, @data
     mov ds, ax
@@ -344,11 +465,26 @@ start:
 	call SetSquare
 
 
+	;call CanObjMovR
+	;cmp ax, 1
+	;jne Exit
+	;call MovObjRight
+	;call MovObjRight
+	;call MovObjRight
+
+
+	;call DrawBoard
+
 	forever:
 	call Delay
-	call CanObjFall
+	push 0
+	push 1
+	call CanObjMov
 	cmp ax, 1
 	jne Exit
+	push 0
+	push 1
+	push 0
 	call DropObj
 	call DrawBoard
 	jmp forever
