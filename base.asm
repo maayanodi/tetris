@@ -3,7 +3,7 @@ MODEL small
 STACK 100h
 DATASEG
 
-board db 18,18,18,18,18,18,18,18,18,18,18,18, 20 dup(18,3,0,0,1,0,0,0,0,0,4,18), 18,18,18,18,18,18,18,18,18,18,18,18
+board db 18,18,18,18,18,18,18,18,18,18,18,18, 20 dup(18,0,0,0,0,0,0,00,0,0,0,18), 18,18,18,18,18,18,18,18,18,18,18,18
 columns db 12
 x dw 160
 y dw 100
@@ -32,7 +32,39 @@ proc GetSquare
 endp GetSquare
 
 
+proc SetSquare
+	push bp
+	mov bp, sp
+	
+	push bx
+	push cx
+	push dx
+	
+	mov bx, [bp+8] ;x
+	mov cx, [bp+6] ;y
+	mov dx, [bp+4]
+	
+	and dh, 80h
+	and dl, 7Fh
+	or dl, dh
+	
+	mov ax, cx
+	mul [columns]
+	add ax, bx
+	mov bx, ax
+	mov [BYTE PTR board + bx], dl
+	
+	
+	pop dx
+	pop cx
+	pop bx
+	pop bp
+	
+	ret 6
+endp SetSquare
 
+	
+	
 proc DrawSquare
 	push bp
 	mov bp, sp
@@ -41,10 +73,11 @@ proc DrawSquare
 	push cx
 	push dx
 	
-	mov ax, [bp+6]
+	mov ax, [bp+6] ;4?
+	inc ax
 	mov bx, 320
 	mul bx
-	add ax, [bp+8]
+	add ax, [bp+8] ;6?
 	mov bx, 8
 	mul bx
 	mov bx, ax
@@ -100,6 +133,137 @@ proc DrawBoard
 endp DrawBoard
 
 
+proc CanSquareFall
+	push bp
+	mov bp, sp
+	mov ax, [bp+6]
+	mov bx, [bp+4]
+	inc bx
+	push ax
+	push bx
+	call GetSquare
+	
+	cmp ah, 80h
+	je FallingOrEmpty
+	
+	cmp al, 0
+	je FallingOrEmpty
+	
+	xor ax, ax
+	jmp CantFall
+	
+	FallingOrEmpty:
+	mov ax, 1
+	
+	CantFall:
+	pop bp
+	ret 4
+endp CanSquareFall
+
+
+
+proc CanObjFall
+	push cx
+	push dx
+
+	
+	mov dx, 20
+	col:
+		mov cx, 10
+		row:
+			push cx
+			push dx
+			call GetSquare
+			cmp ah, 80h
+			jne SoFarSoGood
+			
+			push cx
+			push dx
+			call CanSquareFall
+			cmp ax, 1
+			je SoFarSoGood
+			xor ax, ax
+			jmp return
+			
+			SoFarSoGood:
+			loop row
+		dec dx
+		cmp dx, 0
+		jne col
+	
+	mov ax, 1
+	
+	return:
+	pop dx
+	pop cx
+	ret
+endp CanObjFall
+	
+	
+proc DropSquare
+	push bp
+	mov bp, sp
+	mov cx, [bp+6]
+	mov dx, [bp+4]
+	push cx
+	push dx
+	call GetSquare
+	
+	inc dx
+	push cx
+	push dx
+	push ax
+	call SetSquare
+	
+	dec dx
+	xor ax, ax
+	push cx
+	push dx
+	push ax
+	call SetSquare
+	pop bp
+	ret 4
+endp DropSquare
+	
+
+proc DropObj
+	push cx
+	push dx
+	push bx
+
+	
+	mov dx, 20
+	Dcol:
+		mov cx, 10
+		Drow:
+			push cx
+			push dx
+			call GetSquare
+			cmp ah, 80h
+			je Drop
+			jmp DontDrop
+			
+			Drop:
+			push cx
+			push dx
+			call DropSquare
+
+			
+			DontDrop:
+			loop Drow
+		dec dx
+		cmp dx, 0
+		jne Dcol
+
+	call DrawBoard
+	
+	pop bx
+	pop dx
+	pop cx
+	ret
+endp DropObj
+
+
 
 start:	
     mov ax, @data
@@ -109,9 +273,45 @@ start:
 	
 	mov ax, 13h
 	int 10h
-		
-	call DrawBoard
 	
+	push 5
+	push 1
+	mov ah, 80h
+	mov al, 4
+	push ax
+	call SetSquare
+	
+	push 6
+	push 1
+	mov ah, 80h
+	mov al, 4
+	push ax
+	call SetSquare
+	
+	push 5
+	push 2
+	mov ah, 80h
+	mov al, 4
+	push ax
+	call SetSquare
+	
+	push 6
+	push 2
+	mov ah, 80h
+	mov al, 4
+	push ax
+	call SetSquare
+
+		
+	call CanObjFall
+	cmp ax, 1
+	jne Exit
+	call DropObj
+	call DropObj
+	call DropObj
+	call DrawBoard
+
+
 Exit:
     mov ax, 4C00h
     int 21h
