@@ -226,10 +226,12 @@ endp CanObjMov
 proc MovSquare
 	push bp
 	mov bp, sp
+
+	push cx
+	push dx
+
 	mov cx, [bp+6] 
 	mov dx, [bp+4]
-
-
 
 	push cx
 	push dx
@@ -245,10 +247,14 @@ proc MovSquare
 	sub cx, [bp+10]
 	sub dx, [bp+8]
 	xor ax, ax
+
 	push cx
 	push dx
 	push ax
 	call SetSquare
+
+	pop dx
+	pop cx
 	pop bp
 	ret 8
 endp MovSquare
@@ -337,7 +343,7 @@ system_time:
   div bx
 
   mov dx, 0
-  mov bx, 2
+  mov bx, 5
   div  bx
   cmp  dx, 0
   jnz  system_time
@@ -405,6 +411,8 @@ start:
 
 	;call DrawBoard
 
+	call DrawBoard
+	call Delay
 	forever:
 	call Delay
 	push 0
@@ -412,9 +420,9 @@ start:
 	call CanObjMov
 	cmp ax, 1
 	jne Exit
+	push 0
+	push 0
 	push 1
-	push 0
-	push 0
 	call MovObj
 	call DrawBoard
 	jmp forever
