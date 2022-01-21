@@ -3,7 +3,7 @@ MODEL small
 STACK 100h
 DATASEG
 
-board db 18,18,18,18,18,18,18,18,18,18,18,18, 20 dup(18,0,0,0,0,0,0,00,0,0,0,18), 18,18,18,18,18,18,18,18,18,18,18,18
+board db 18,18,18,18,18,18,18,18,18,18,18,18, 20 dup(18,0,0,0,0,0,0,0,0,0,0,18), 18,18,18,18,18,18,18,18,18,18,18,18
 columns db 12
 x dw 160
 y dw 100
@@ -254,7 +254,7 @@ proc MovSquare
 endp MovSquare
 	
 
-proc DropObj
+proc MovObj
 	push bp
 	mov bp, sp
 
@@ -311,77 +311,7 @@ proc DropObj
 	pop cx
 	pop bp
 	ret 6
-endp DropObj
-
-
-
-;move right
-
-
-proc MovSquareRight
-	push bp
-	mov bp, sp
-	mov cx, [bp+6]
-	mov dx, [bp+4]
-	push cx
-	push dx
-	call GetSquare
-	
-	inc cx
-	push cx
-	push dx
-	push ax
-	call SetSquare
-	
-	dec cx
-	xor ax, ax
-	push cx
-	push dx
-	push ax
-	call SetSquare
-	pop bp
-	ret 4
-endp MovSquareRight
-
-
-proc MovObjRight
-	push cx
-	push dx
-	push bx
-
-	
-	mov dx, 20
-	MRcol:
-		mov cx, 10
-		MRrow:
-			push cx
-			push dx
-			call GetSquare
-			cmp ah, 80h
-			je MovRight
-			jmp DontMovR
-			
-			MovRight:
-			push cx
-			push dx
-			call MovSquare
-
-			
-			DontMovR:
-			loop MRrow
-		dec dx
-		cmp dx, 0
-		jne MRcol
-
-	call DrawBoard
-	
-	pop bx
-	pop dx
-	pop cx
-	ret
-endp MovObjRight
-
-
+endp MovObj
 
 
 proc Delay
@@ -482,10 +412,10 @@ start:
 	call CanObjMov
 	cmp ax, 1
 	jne Exit
-	push 0
 	push 1
 	push 0
-	call DropObj
+	push 0
+	call MovObj
 	call DrawBoard
 	jmp forever
 
