@@ -12,14 +12,12 @@ Shape5 db 	  0, 0, 0, 0, 0, 5, 5, 5, 0, 5, 0, 0, 0, 0, 0, 0
 Shape6 db 	  0, 0, 0, 0, 6, 6, 0, 0, 0, 6, 6, 0, 0, 0, 0, 0
 Shape7 db 	  0, 0, 0, 0, 0, 0, 9, 9, 0, 9, 9, 0, 0, 0, 0, 0
 
-
-
-
 columns db 12
 x dw 160
 y dw 100
 DelayDiv dw 0000h
 CurrRandom dw 1234h
+FallRate dw 5
 
 
 CODESEG
@@ -357,7 +355,7 @@ system_time:
   div bx
 
   mov dx, 0
-  mov bx, 5
+  mov bx, [FallRate]
   div  bx
   cmp  dx, 0
   jnz  system_time
@@ -395,6 +393,11 @@ proc LeftOrRight
 	cmp al, 100
 	je DDDD
 
+	cmp al, 86
+	je SSSS
+	cmp al, 115
+	je SSSS
+
 	jmp NoNeedToMov
 
 	AAAA:
@@ -422,6 +425,11 @@ proc LeftOrRight
 	Move:
 	push 0
 	call MovObj
+
+	jmp NoNeedToMov
+
+	SSSS:
+	mov [FallRate], 1
 
 	NoNeedToMov:
 	ret 
@@ -717,6 +725,7 @@ start:
 
 
     AnotherShape:
+	mov [FallRate], 5
 	call DrawRandomShape	
 
 	call DrawBoard
