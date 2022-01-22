@@ -84,16 +84,18 @@ proc DrawSquare
 	push cx
 	push dx
 	
-	mov ax, [bp+6] ;4?
+	mov ax, [bp+6]
 	inc ax
 	mov bx, 320
 	mul bx
-	add ax, [bp+8] ;6?
+	add ax, [bp+8]
 	mov bx, 8
 	mul bx
 	mov bx, ax
+	add bx, 112
 
 	mov ax, [bp+4]
+
 
 	mov dx, 7
 	Pcol:
@@ -121,10 +123,12 @@ proc DrawBoard
 	push cx
 	push dx
 
-	mov dx, 20
+	mov dx, 21
 	Bcol:
-		mov cx, 10
+		mov cx, 12
 		Brow:
+		    dec cx
+			
 			push cx
 			push dx
 			call GetSquare
@@ -132,6 +136,8 @@ proc DrawBoard
 			push dx
 			push ax
 			call DrawSquare
+
+			inc cx
 			loop Brow
 		dec dx
 		cmp dx, 0
