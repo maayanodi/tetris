@@ -477,21 +477,21 @@ proc DropLine
 	
 	mov cx, 10
 	SetRow:
-	mov bx, [bp+4] ;y
-	SetCol:
-	push cx
-	push bx
-	call GetSquare
-	or ax, 80h
+		mov bx, [bp+4] ;y
+		SetCol:
+			push cx
+			push bx
+			call GetSquare
 
-	push cx
-	push bx
-	push ax
-	call SetSquare
+			push cx
+			push bx
+			mov ah, 80h
+			push ax
+			call SetSquare
 
-	dec bx
-	cmp bx, 0
-	jne SetCol
+		dec bx
+		cmp bx, 0
+		jne SetCol
 
 	loop SetRow
 
@@ -510,23 +510,56 @@ endp DropLine
 
 proc DropAllLines
 	push cx
+	push bx
 
 	mov cx, 20
 	BordLoop:
-		push cx
+		mov bx, 21
+		sub bx, cx
+
+		push bx
 		call IsLineFull
 		cmp ax, 1
 		jne Nope
 
-		push cx
+		push bx
 		call DropLine
 
 		Nope:
 		loop BordLoop
-	
+	call MakeBooardNotFall
+
+	pop bx
+	pop cx
 	ret
 endp DropAllLines
 
+proc MakeSquareNotFall
+	push bp
+	mov bp, sp
+
+	push bx
+	push cx
+
+	mov bx, [bp+6]
+	mov cx, [bp+4]
+
+	push bx
+	push cx
+	call GetSquare
+
+	mov ah, 0
+	push bx
+	push cx
+	push ax
+	call SetSquare
+
+	pop cx
+	pop bx
+	pop bp
+
+	ret 4
+endp MakeSquareNotFall
 
 
 proc MakeBooardNotFall
@@ -538,21 +571,17 @@ proc MakeBooardNotFall
 		mov cx, 10 ;x
 		Nrow:
 
-		push cx
-		push dx
-		call GetSquare
+		  push cx
+		  push dx
+		  call MakeSquareNotFall
 
-		and ax, 7Fh
-
-		push cx
-		push dx
-		push ax
-		call SetSquare
-
-			loop Nrow
+		loop Nrow
 		dec dx
 		cmp dx, 0
 		jne Ncol
+	
+	pop dx
+	pop cx
 	ret
 endp MakeBooardNotFall
 
@@ -609,23 +638,27 @@ start:
 
 	;call DrawBoard
 
+	
 	call DrawBoard
 	call Delay
-	forever:
-	call Delay
-	push 0
-	push 1
-	call CanObjMov
-	cmp ax, 1
-	jne Exit
-	push 0
-	push 0
-	push 1
-	call MovObj
-	call DrawBoard
-	jmp forever
-
-
+	forever1:
+		call Delay
+		push 0
+		push 1
+		call CanObjMov
+		cmp ax, 1
+		jne NearStart
+		push 0
+		push 0
+		push 1
+		call MovObj
+		call DrawBoard
+	jmp forever1
+	
+	NearStart:
+	call MakeBooardNotFall
+	call DropAllLines
+	jmp start
 
 Exit:
     mov ax, 4C00h
