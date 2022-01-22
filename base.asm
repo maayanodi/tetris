@@ -3,11 +3,23 @@ MODEL small
 STACK 100h
 DATASEG
 
-board db 18,18,18,18,18,18,18,18,18,18,18,18, 18 dup(18,0,0,0,0,0,0,0,0,0,0,18),    18,4,4,4,4,4,4,4,4,0,0,18,    18,4,4,4,4,4,4,4,4,0,0,18,    18,18,18,18,18,18,18,18,18,18,18,18
+board db 18,18,18,18,18,18,18,18,18,18,18,18, 20 dup(18,0,0,0,0,0,0,0,0,0,0,18), 18,18,18,18,18,18,18,18,18,18,18,18
+Shape1 db     0, 0, 0, 0, 4, 4, 4, 0, 0, 4, 0, 0, 0, 0, 0, 0
+Shape2 db 	  0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0
+Shape3 db 	  0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0
+Shape4 db 	  0, 0, 0, 0, 3, 3, 3, 0, 0, 0, 3, 0, 0, 0, 0, 0
+Shape5 db 	  0, 0, 0, 0, 0, 5, 5, 5, 0, 5, 0, 0, 0, 0, 0, 0
+Shape6 db 	  0, 0, 0, 0, 6, 6, 0, 0, 0, 6, 6, 0, 0, 0, 0, 0
+Shape7 db 	  0, 0, 0, 0, 0, 0, 9, 9, 0, 9, 9, 0, 0, 0, 0, 0
+
+
+
+
 columns db 12
 x dw 160
 y dw 100
 DelayDiv dw 0000h
+CurrRandom dw 1234h
 
 
 CODESEG
@@ -587,7 +599,110 @@ proc MakeBooardNotFall
 endp MakeBooardNotFall
 
 
+proc GetShapeSquare
+	push bp
+	mov bp, sp
 
+	push bx
+	
+	mov ax, [bp+6]
+	mov bh, 4
+	dec ax
+	mul bh
+	add ax, [bp+8]
+	dec ax
+
+	mov bx, ax
+	add bx, [bp+4]
+	mov al, [BYTE PTR bx]
+	mov ah, al
+	and al, 7Fh
+	mov ah, 80h
+	
+	pop bx
+
+	pop bp
+	ret 6
+endp GetShapeSquare
+
+
+
+proc DrawShape
+	push bp
+	mov bp, sp
+
+	push bx
+	push cx
+	push dx
+
+	mov bx, [bp+4]
+	mov ax, 16
+	mul bx
+	mov bx, ax
+	add bx, offset Shape1
+
+	mov dx, 4
+	ShapeCol:
+		mov cx, 4
+		ShapeRow:
+			push cx
+			push dx
+			push bx
+			call GetShapeSquare
+			cmp al, 0
+			je DontSet
+			
+			add cx, 3
+			push cx
+			push dx
+			push ax
+			call SetSquare
+			
+			sub cx, 3
+
+			DontSet:
+		loop ShapeRow
+		dec dx
+		cmp dx, 0
+	jne ShapeCol
+
+	pop dx
+	pop cx
+	pop bx
+	pop bp
+	ret 2
+endp DrawShape
+
+
+
+proc DrawRandomShape
+	push bx
+	push cx
+	push dx
+	
+
+	mov ah, 2ch
+	int 21
+
+	mov ax, [CurrRandom]
+	rcl [CurrRandom], 1
+
+	xor ax, [CurrRandom]
+	xor ax, dx
+	mov [CurrRandom], ax
+
+	xor dx, dx
+	mov cx, 7
+	div cx
+
+	push dx
+	call DrawShape
+
+	pop dx
+	pop cx
+	pop bx
+	ret
+endp DrawRandomShape
 
 
 
@@ -599,67 +714,31 @@ start:
 	
 	mov ax, 13h
 	int 10h
-	
-	push 5
-	push 1
-	mov ah, 80h
-	mov al, 4
-	push ax
-	call SetSquare
-	
-	push 6
-	push 1
-	mov ah, 80h
-	mov al, 4
-	push ax
-	call SetSquare
-	
-	push 5
-	push 2
-	mov ah, 80h
-	mov al, 4
-	push ax
-	call SetSquare
-	
-	push 6
-	push 2
-	mov ah, 80h
-	mov al, 4
-	push ax
-	call SetSquare
 
 
-	;call CanObjMovR
-	;cmp ax, 1
-	;jne Exit
-	;call MovObjRight
-	;call MovObjRight
-	;call MovObjRight
+    AnotherShape:
+	call DrawRandomShape	
 
-
-	;call DrawBoard
-
-	
 	call DrawBoard
-	call Delay
-	forever1:
+
+	Tick:
 		call Delay
 		push 0
 		push 1
 		call CanObjMov
 		cmp ax, 1
-		jne NearStart
+		jne NearAnotherShape
 		push 0
 		push 0
 		push 1
 		call MovObj
 		call DrawBoard
-	jmp forever1
+	jmp Tick
 	
-	NearStart:
+	NearAnotherShape:
 	call MakeBooardNotFall
 	call DropAllLines
-	jmp start
+	jmp AnotherShape
 
 Exit:
     mov ax, 4C00h
