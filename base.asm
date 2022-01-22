@@ -327,6 +327,8 @@ push cx
 push dx
 
 system_time:   
+  call LeftOrRight
+
   mov  ah, 2ch
   int  21h
   
@@ -359,6 +361,202 @@ system_time:
 
   ret
  endp Delay
+
+
+proc LeftOrRight
+	mov ah, 01h
+	int 16h
+	jne YesMove
+	jmp NoNeedToMov
+
+	YesMove:
+	mov ah, 00h
+	int 16h
+
+	cmp al, 65
+	je AAAA
+	cmp al, 97
+	je AAAA
+
+	cmp al, 68
+	je DDDD
+	cmp al, 100
+	je DDDD
+
+	jmp NoNeedToMov
+
+	AAAA:
+	push -1
+	push 0
+	call CanObjMov
+
+	cmp ax, 1
+	jne NoNeedToMov
+
+	push 1
+	push -1
+	jmp Move
+
+	DDDD:
+	push 1
+	push 0
+	call CanObjMov
+	cmp ax, 1
+	jne NoNeedToMov
+
+	push 0
+	push 1
+
+	Move:
+	push 0
+	call MovObj
+
+	NoNeedToMov:
+	ret 
+endp LeftOrRight
+
+
+
+proc IsLineFull
+	push bp
+	mov bp, sp
+
+	push bx
+	push cx
+
+	mov bx, [bp+4]
+
+		mov cx, 10
+		lineloop:
+			push cx
+			push bx
+			call GetSquare
+
+			and ax, 7Fh
+			cmp ax, 0
+			je NotFull
+
+			loop lineloop
+	
+	mov ax, 1
+	jmp returnv
+
+
+	NotFull:
+	xor ax, ax
+
+
+	returnv:
+	pop cx
+	pop bx
+	pop bp
+
+	ret 2
+endp IsLineFull
+
+
+proc DropLine
+	push bp
+	mov bp, sp
+
+	push bx
+	push cx
+	push dx
+	
+	mov bx, [bp+4] ;y
+
+	mov cx, 10 ;x
+	ClearLoop:
+		push cx
+		push bx
+		xor ax, ax
+		push ax
+		call SetSquare
+
+		loop ClearLoop
+	
+	mov cx, 10
+	SetRow:
+	mov bx, [bp+4] ;y
+	SetCol:
+	push cx
+	push bx
+	call GetSquare
+	or ax, 80h
+
+	push cx
+	push bx
+	push ax
+	call SetSquare
+
+	dec bx
+	cmp bx, 0
+	jne SetCol
+
+	loop SetRow
+
+	push 0
+	push 1
+	call MovObj
+
+	pop dx
+	pop cx
+	pop bx
+	pop bp
+
+	ret 2
+endp DropLine
+
+
+proc DropAllLines
+	push cx
+
+	mov cx, 20
+	BordLoop:
+		push cx
+		call IsLineFull
+		cmp ax, 1
+		jne Nope
+
+		push cx
+		call DropLine
+
+		Nope:
+		loop BordLoop
+	
+	ret
+endp DropAllLines
+
+
+
+proc MakeBooardNotFall
+	push cx
+	push dx
+
+	mov dx, 20 ;y
+	Ncol:
+		mov cx, 10 ;x
+		Nrow:
+
+		push cx
+		push dx
+		call GetSquare
+
+		and ax, 7Fh
+
+		push cx
+		push dx
+		push ax
+		call SetSquare
+
+			loop Nrow
+		dec dx
+		cmp dx, 0
+		jne Ncol
+	ret
+endp MakeBooardNotFall
+
+
 
 
 
