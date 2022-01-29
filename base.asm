@@ -621,7 +621,7 @@ proc HandleKeys
 
 	NotD:
 
-	cmp al, 83
+	cmp al, 87
 	jne NotS
 
 	; Is S
@@ -630,7 +630,7 @@ proc HandleKeys
 
 	NotS:
 
-	cmp al, 87
+	cmp al, 83
 	jne NotW
 
 	; Is W
@@ -744,6 +744,7 @@ proc DropLine
 	mov cx, 10
 	SetRow:
 		mov bx, [bp+4] ;y
+		dec bx
 		SetCol:
 			push cx
 			push bx
@@ -779,11 +780,9 @@ proc DropAllLines
 	push cx
 	push bx
 
-	mov cx, 20
+	mov bx, 1
 	BordLoop:
-		mov bx, 21
-		sub bx, cx
-
+	
 		push bx
 		call IsLineFull
 		cmp ax, 1
@@ -794,7 +793,9 @@ proc DropAllLines
 		inc cx
 
 		Nope:
-		loop BordLoop
+		inc bx
+		cmp bx, 20
+		jle BordLoop
 	call MakeBooardNotFall
 
 	pop bx
