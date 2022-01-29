@@ -195,6 +195,10 @@ y dw 100
 DelayDiv dw 0000h
 CurrRandom dw 1234h
 FallRate dw 5
+Shapex dw 3
+Shapey dw 0
+ShapeRotation dw 0
+ShapeType dw 0
 
 
 CODESEG
@@ -505,6 +509,14 @@ proc MovObj
 
 	call DrawBoard
 	
+	mov bx, [Shapex]
+	add bx, [bp+6]
+	mov [Shapex], bx
+
+	mov bx, [Shapey]
+	add bx, [bp+4]
+	mov [Shapey], bx
+
 	pop bx
 	pop dx
 	pop cx
@@ -520,7 +532,7 @@ push cx
 push dx
 
 system_time:   
-  call LeftOrRight
+  call HandleKeys
 
   mov  ah, 2ch
   int  21h
@@ -556,45 +568,46 @@ system_time:
  endp Delay
 
 
-proc LeftOrRight
+proc HandleKeys
+	push bx
+
 	mov ah, 01h
 	int 16h
-	jne YesMove
+	jne KeyPressed
 	jmp NoNeedToMov
 
-	YesMove:
+	KeyPressed:
 	mov ah, 00h
 	int 16h
 
-	cmp al, 65
-	je AAAA
 	cmp al, 97
-	je AAAA
+	jge ToUpper
+	jmp AlreadyUpper
+	ToUpper:
+	sub ax, 32
+	AlreadyUpper:
 
-	cmp al, 68
-	je DDDD
-	cmp al, 100
-	je DDDD
+	cmp al, 65
+	jne NotA
 
-	cmp al, 86
-	je SSSS
-	cmp al, 115
-	je SSSS
-
-	jmp NoNeedToMov
-
-	AAAA:
+	; Is A
 	push -1
 	push 0
 	call CanObjMov
 
 	cmp ax, 1
-	jne NoNeedToMov
+	jne NotA
 
 	push 1
 	push -1
 	jmp Move
 
+	NotA:
+
+	cmp al, 68
+	jne NotD
+
+	; Is D
 	DDDD:
 	push 1
 	push 0
@@ -604,20 +617,70 @@ proc LeftOrRight
 
 	push 0
 	push 1
+	jmp Move
+
+	NotD:
+
+	cmp al, 83
+	jne NotS
+
+	; Is S
+	mov [FallRate], 1
+	jmp NoNeedToMov
+
+	NotS:
+
+	cmp al, 87
+	jne NotW
+
+	; Is W
+	call GetNextRotation
+	mov dx, [ShapeRotation]
+	mov [ShapeRotation], ax
+
+	call CanDrawShapeWxy
+	cmp ax, 0
+	je RestoreRotation
+
+	call DeleteFallingShape
+	call DrawShapeWxy
+	jmp NotW
+	
+	RestoreRotation:
+	mov [ShapeRotation], dx
+	jmp NoNeedToMov
+
+	NotW:
+	jmp NoNeedToMov
 
 	Move:
 	push 0
 	call MovObj
 
-	jmp NoNeedToMov
-
-	SSSS:
-	mov [FallRate], 1
-
 	NoNeedToMov:
-	ret 
-endp LeftOrRight
 
+	pop bx
+	ret 
+	
+endp HandleKeys
+
+proc GetNextRotation
+
+	push dx
+	push bx
+
+	xor dx, dx
+	mov ax, [ShapeRotation]
+	inc ax
+	mov bx, 4
+	div bx
+	mov ax, dx
+	
+	pop bx
+	pop dx
+
+	ret
+endp GetNextRotation
 
 
 proc IsLineFull
@@ -819,53 +882,6 @@ endp GetShapeSquare
 
 
 
-proc DrawShape
-	push bp
-	mov bp, sp
-
-	push bx
-	push cx
-	push dx
-
-	mov bx, [bp+4]
-	mov ax, 16
-	mul bx
-	mov bx, ax
-	add bx, offset Shape11
-
-	mov dx, 4
-	ShapeCol:
-		mov cx, 4
-		ShapeRow:
-			push cx
-			push dx
-			push bx
-			call GetShapeSquare
-			cmp al, 0
-			je DontSet
-			
-			add cx, 3
-			push cx
-			push dx
-			push ax
-			call SetSquare
-			
-			sub cx, 3
-
-			DontSet:
-		loop ShapeRow
-		dec dx
-		cmp dx, 0
-	jne ShapeCol
-
-	pop dx
-	pop cx
-	pop bx
-	pop bp
-	ret 2
-endp DrawShape
-
-
 
 proc DrawRandomShape
 	push bx
@@ -878,26 +894,26 @@ proc DrawRandomShape
 
 	mov ax, [CurrRandom]
 	rcl [CurrRandom], 3
-	inc [CurrRandom];;;;;;;
 
 	xor ax, [CurrRandom]
 	xor ax, dx
 	mov [CurrRandom], ax
 
+    mov dl, dh
+	mov ax, [ShapeType] ; remove
+	inc ax ; remove
+	add ax, dx
 	xor dx, dx
 	mov cx, 7
 	div cx
 
-	push 3
-	push 0
-	push dx
+	mov [ShapeType], dx
+
 	call CanDrawShapeWxy
 	cmp ax, 0
 	je Cant
 
-	push 3
-	push 0
-	push dx
+
 	call DrawShapeWxy
 	mov ax, 1
 	jmp RR
@@ -912,7 +928,6 @@ proc DrawRandomShape
 endp DrawRandomShape
 
 
-
 proc CanDrawShapeWxy
 	push bp
 	mov bp, sp
@@ -921,44 +936,49 @@ proc CanDrawShapeWxy
 	push cx
 	push dx
 
-	mov bx, [bp+4]
+	mov bx, [ShapeType]
 	mov ax, 64
 	mul bx
 	mov bx, ax
 	add bx, offset Shape11
+	
+	mov ax, [ShapeRotation]
+	push cx
+	mov cx, 16
+	mul cx
+	pop cx
+	add bx, ax
 
 	mov dx, 4
 	ShapeColy:
 		mov cx, 4
 		ShapeRowx:
-			push cx
 
 			push cx
 			push dx
 			push bx
 			call GetShapeSquare
+
 			cmp al, 0
 			je IsEmptyOrFalling
 			
-			add cx, [bp+8] ;x
-			add dx, [bp+6] ;y
+			add cx, [Shapex] ;x
+			add dx, [Shapey] ;y
 			push cx
 			push dx
+			sub cx, [Shapex]
+			sub dx, [Shapey]
 			call GetSquare
 
 			cmp ax, 0
 			je IsEmptyOrFalling
 
-			cmp ax, 80h
-			jge IsEmptyOrFalling
+			cmp ah, 80h
+			je IsEmptyOrFalling
 
 			jmp ObjCantMov
 			
-			sub cx, [bp+8]
-			sub dx, [bp+6]
-
 			IsEmptyOrFalling:
-			pop cx
 		loop ShapeRowx
 		dec dx
 		cmp dx, 0
@@ -968,17 +988,17 @@ proc CanDrawShapeWxy
 	jmp R
 
 	ObjCantMov:
-	pop cx
 	xor ax, ax
 
 
 	R:
+
 	pop dx
 	pop cx
 	pop bx
 	pop bp
 
-	ret 6
+	ret
 endp CanDrawShapeWxy
 
 
@@ -990,11 +1010,19 @@ proc DrawShapeWxy
 	push cx
 	push dx
 
-	mov bx, [bp+4]
+	mov bx, [ShapeType]
 	mov ax, 64
 	mul bx
 	mov bx, ax
 	add bx, offset Shape11
+
+	mov ax, [ShapeRotation]
+	push cx
+	mov cx, 16
+	mul cx
+	pop cx
+	add bx, ax
+
 
 	mov dx, 4
 	ShapeColyy:
@@ -1007,15 +1035,15 @@ proc DrawShapeWxy
 			cmp al, 0
 			je DontSett
 			
-			add cx, [bp+8] ;x
-			add dx, [bp+6] ;y
+			add cx, [Shapex] ;x
+			add dx, [Shapey] ;y
 			push cx
 			push dx
 			push ax
 			call SetSquare
 			
-			sub cx, [bp+8]
-			sub dx, [bp+6]
+			sub cx, [Shapex]
+			sub dx, [Shapey]
 
 			DontSett:
 		loop ShapeRowxx
@@ -1023,15 +1051,68 @@ proc DrawShapeWxy
 		cmp dx, 0
 	jne ShapeColyy
 
+	call DrawBoard
+
 	pop dx
 	pop cx
 	pop bx
 	pop bp
 
-	ret 6
+	ret
 endp DrawShapeWxy
 
+proc DeleteFallingShapeSquare
+	push bp
+	mov bp, sp
 
+	push bx
+	push cx
+
+	mov bx, [bp+6]
+	mov cx, [bp+4]
+
+	push bx
+	push cx
+	call GetSquare
+
+    cmp ah, 80h
+	jne DoNotDelete
+	mov ax, 0
+	push bx
+	push cx
+	push ax
+	call SetSquare
+
+    DoNotDelete:
+	pop cx
+	pop bx
+	pop bp
+
+	ret 4
+endp DeleteFallingShapeSquare
+
+proc DeleteFallingShape
+	push cx
+	push dx
+
+	mov dx, 20 ;y
+	DFNcol:
+		mov cx, 10 ;x
+		DFNrow:
+
+		  push cx
+		  push dx
+		  call DeleteFallingShapeSquare
+
+		loop DFNrow
+		dec dx
+		cmp dx, 0
+		jne DFNcol
+	
+	pop dx
+	pop cx
+	ret
+endp DeleteFallingShape
 
 start:	
     mov ax, @data
@@ -1045,6 +1126,10 @@ start:
 
     AnotherShape:
 	mov [FallRate], 5
+	mov [Shapex], 3
+	mov [Shapey], 1
+	mov [ShapeRotation], 0
+
 	call DrawRandomShape
 	cmp ax, 0
 	je lose
@@ -1069,7 +1154,6 @@ start:
 	call MakeBooardNotFall
 	call DropAllLines
 	jmp AnotherShape
-
 
 
 	lose:
