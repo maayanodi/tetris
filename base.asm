@@ -622,16 +622,16 @@ proc HandleKeys
 	NotD:
 
 	cmp al, 87
-	jne NotS
+	jne NotW
 
 	; Is S
 	mov [FallRate], 1
 	jmp NoNeedToMov
 
-	NotS:
+	NotW:
 
 	cmp al, 83
-	jne NotW
+	jne NotS
 
 	; Is W
 	call GetNextRotation
@@ -644,13 +644,13 @@ proc HandleKeys
 
 	call DeleteFallingShape
 	call DrawShapeWxy
-	jmp NotW
+	jmp NotS
 	
 	RestoreRotation:
 	mov [ShapeRotation], dx
 	jmp NoNeedToMov
 
-	NotW:
+	NotS:
 	jmp NoNeedToMov
 
 	Move:
