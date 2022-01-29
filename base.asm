@@ -4,13 +4,190 @@ STACK 100h
 DATASEG
 
 board db 18,18,18,18,18,18,18,18,18,18,18,18, 20 dup(18,0,0,0,0,0,0,0,0,0,0,18), 18,18,18,18,18,18,18,18,18,18,18,18
-Shape1 db     0, 0, 0, 0, 4, 4, 4, 0, 0, 4, 0, 0, 0, 0, 0, 0
-Shape2 db 	  0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0
-Shape3 db 	  0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0
-Shape4 db 	  0, 0, 0, 0, 3, 3, 3, 0, 0, 0, 3, 0, 0, 0, 0, 0
-Shape5 db 	  0, 0, 0, 0, 0, 5, 5, 5, 0, 5, 0, 0, 0, 0, 0, 0
-Shape6 db 	  0, 0, 0, 0, 6, 6, 0, 0, 0, 6, 6, 0, 0, 0, 0, 0
-Shape7 db 	  0, 0, 0, 0, 0, 0, 9, 9, 0, 9, 9, 0, 0, 0, 0, 0
+
+;; Shape 1 ;;
+
+;Shape11 db		0, 0, 0, 0,
+;				4, 4, 4, 0,
+;				0, 4, 0, 0,
+;				0, 0, 0, 0
+Shape11 db    	0, 0, 0, 0, 4, 4, 4, 0, 0, 4, 0, 0, 0, 0, 0, 0
+
+;Shape12 db		0, 4, 0, 0,
+;				4, 4, 0, 0,
+;				0, 4, 0, 0,
+;				0, 0, 0, 0
+Shape12 db		0, 4, 0, 0, 4, 4, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0
+
+;Shape13 db		0, 4, 0, 0,
+;				4, 4, 4, 0,
+;				0, 0, 0, 0,
+;				0, 0, 0, 0
+Shape13 db		0, 4, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+;Shape14 db		0, 4, 0, 0,
+;				0, 4, 4, 0,
+;				0, 4, 0, 0,
+;				0, 0, 0, 0
+Shape14 db		0, 4, 0, 0, 0, 4, 4, 0, 0, 4, 0, 0, 0, 0, 0, 0
+
+;; Shape 2 ;;
+
+;Shape21 db		0, 0, 0, 0,
+;				0, 1, 1, 0, 
+;				0, 1, 1, 0, 
+;				0, 0, 0, 0
+Shape21 db 	  0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0
+
+;Shape21 db		0, 0, 0, 0,
+;				0, 1, 1, 0, 
+;				0, 1, 1, 0, 
+;				0, 0, 0, 0
+Shape22 db 	  0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0
+
+;Shape21 db		0, 0, 0, 0,
+;				0, 1, 1, 0, 
+;				0, 1, 1, 0, 
+;				0, 0, 0, 0
+Shape23 db 	  0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0
+
+;Shape21 db		0, 0, 0, 0,
+;				0, 1, 1, 0, 
+;				0, 1, 1, 0, 
+;				0, 0, 0, 0
+Shape24 db 	  0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0
+
+;; Shape 3 ;;
+
+;Shape31 db		0, 0, 0, 0,
+;				0, 0, 0, 0,
+;				2, 2, 2, 2,
+;				0, 0, 0, 0
+Shape31 db 	  0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0
+
+;Shape32 db		0, 2, 0, 0,
+;				0, 2, 0, 0,
+;				0, 2, 0, 0,
+;				0, 2, 0, 0
+Shape32 db		0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0
+
+;Shape33 db		0, 0, 0, 0,
+;				0, 0, 0, 0,
+;				2, 2, 2, 2,
+;				0, 0, 0, 0
+Shape33 db 	  0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0
+
+;Shape34 db		0, 2, 0, 0,
+;				0, 2, 0, 0,
+;				0, 2, 0, 0,
+;				0, 2, 0, 0
+Shape34 db		0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0
+
+;; Shape 4 ;;
+
+;Shape41 db		0, 0, 0, 0,
+;				3, 3, 3, 0,
+;				0, 0, 3, 0,
+;				0, 0, 0, 0
+Shape41 db 	  0, 0, 0, 0, 3, 3, 3, 0, 0, 0, 3, 0, 0, 0, 0, 0
+
+;Shape42 db		0, 0, 3, 0,
+;				0, 0, 3, 0,
+;				0, 3, 3, 0,
+;				0, 0, 0, 0
+Shape42 db		0, 0, 3, 0, 0, 0, 3, 0, 0, 3, 3, 0, 0, 0, 0, 0
+
+;Shape43 db		0, 0, 0, 0,
+;				0, 3, 0, 0,
+;				0, 3, 3, 3,
+;				0, 0, 0, 0
+Shape43 db		0, 0, 0, 0, 0, 3, 0, 0, 0, 3, 3, 3, 0, 0, 0, 0
+
+;Shape44 db		0, 0, 0, 0,
+;				0, 3, 3, 0,
+;				0, 3, 0, 0,
+;				0, 3, 0, 0
+Shape44 db		0, 0, 0, 0, 0, 3, 3, 0, 0, 3, 0, 0, 0, 3, 0, 0
+
+;; Shape 5 ;;
+
+;Shape51 db		0, 0, 0, 0,
+;				0, 5, 5, 5,
+;				0, 5, 0, 0,
+;				0, 0, 0, 0
+Shape51 db 	  0, 0, 0, 0, 0, 5, 5, 5, 0, 5, 0, 0, 0, 0, 0, 0
+
+;Shape52 db		0, 0, 0, 0,
+;				0, 5, 5, 0,
+;				0, 0, 5, 0,
+;				0, 0, 5, 0
+Shape52 db		0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 5, 0, 0, 0, 5, 0
+
+;Shape53 db		0, 0, 0, 0,
+;				0, 0, 5, 0,
+;				5, 5, 5, 0,
+;				0, 0, 0, 0
+Shape53 db		0, 0, 0, 0, 0, 0, 5, 0, 5, 5, 5, 0, 0, 0, 0, 0
+
+;Shape54 db		0, 5, 0, 0,
+;				0, 5, 0, 0,
+;				0, 5, 5, 0,
+;				0, 0, 0, 0
+Shape54 db		0, 5, 0, 0, 0, 5, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0
+
+
+
+;; Shape 6 ;;
+
+;Shape61 db		0, 0, 0, 0,
+;				6, 6, 0, 0,
+;				0, 6, 6, 0,
+;				0, 0, 0, 0
+Shape61 db 	  0, 0, 0, 0, 6, 6, 0, 0, 0, 6, 6, 0, 0, 0, 0, 0
+
+;Shape62 db		0, 0, 6, 0,
+;				0, 6, 6, 0,
+;				0, 6, 0, 0,
+;				0, 0, 0, 0
+Shape62 db		0, 0, 6, 0, 0, 6, 6, 0, 0, 6, 0, 0, 0, 0, 0, 0
+
+;Shape63 db		0, 0, 0, 0,
+;				6, 6, 0, 0,
+;				0, 6, 6, 0,
+;				0, 0, 0, 0
+Shape63 db		0, 0, 0, 0, 6, 6, 0, 0, 0, 6, 6, 0, 0, 0, 0, 0
+
+;Shape64 db		0, 0, 6, 0,
+;				0, 6, 6, 0,
+;				0, 6, 0, 0,
+;				0, 0, 0, 0
+Shape64 db		0, 0, 6, 0, 0, 6, 6, 0, 0, 6, 0, 0, 0, 0, 0, 0
+
+;; Shape 7 ;;
+
+;Shape71 db		0, 0, 0, 0,
+;				0, 0, 9, 9,
+;				0, 9, 9, 0,
+;				0, 0, 0, 0
+Shape71 db 	  0, 0, 0, 0, 0, 0, 9, 9, 0, 9, 9, 0, 0, 0, 0, 0
+
+;Shape72 db		0, 9, 0, 0,
+;				0, 9, 9, 0,
+;				0, 0, 9, 0,
+;				0, 0, 0, 0
+Shape72 db		0, 9, 0, 0, 0, 9, 9, 0, 0, 0, 9, 0, 0, 0, 0, 0
+
+;Shape73 db		0, 0, 0, 0,
+;				0, 0, 9, 9,
+;				0, 9, 9, 0,
+;				0, 0, 0, 0
+Shape73 db 	  0, 0, 0, 0, 0, 0, 9, 9, 0, 9, 9, 0, 0, 0, 0, 0
+
+;Shape74 db		0, 9, 0, 0,
+;				0, 9, 9, 0,
+;				0, 0, 9, 0,
+;				0, 0, 0, 0
+Shape74 db		0, 9, 0, 0, 0, 9, 9, 0, 0, 0, 9, 0, 0, 0, 0, 0
 
 columns db 12
 x dw 160
@@ -551,6 +728,7 @@ proc DropAllLines
 
 		push bx
 		call DropLine
+		inc cx
 
 		Nope:
 		loop BordLoop
@@ -612,7 +790,7 @@ proc MakeBooardNotFall
 	ret
 endp MakeBooardNotFall
 
-
+; GetShapeSquare(x, y, shape address)
 proc GetShapeSquare
 	push bp
 	mov bp, sp
@@ -653,7 +831,7 @@ proc DrawShape
 	mov ax, 16
 	mul bx
 	mov bx, ax
-	add bx, offset Shape1
+	add bx, offset Shape11
 
 	mov dx, 4
 	ShapeCol:
@@ -699,7 +877,8 @@ proc DrawRandomShape
 	int 21
 
 	mov ax, [CurrRandom]
-	rcl [CurrRandom], 1
+	rcl [CurrRandom], 3
+	inc [CurrRandom];;;;;;;
 
 	xor ax, [CurrRandom]
 	xor ax, dx
@@ -709,14 +888,148 @@ proc DrawRandomShape
 	mov cx, 7
 	div cx
 
+	push 3
+	push 0
 	push dx
-	call DrawShape
+	call CanDrawShapeWxy
+	cmp ax, 0
+	je Cant
 
+	push 3
+	push 0
+	push dx
+	call DrawShapeWxy
+	mov ax, 1
+	jmp RR
+
+	Cant:
+	xor ax, ax
+	RR:
 	pop dx
 	pop cx
 	pop bx
 	ret
 endp DrawRandomShape
+
+
+
+proc CanDrawShapeWxy
+	push bp
+	mov bp, sp
+
+	push bx
+	push cx
+	push dx
+
+	mov bx, [bp+4]
+	mov ax, 64
+	mul bx
+	mov bx, ax
+	add bx, offset Shape11
+
+	mov dx, 4
+	ShapeColy:
+		mov cx, 4
+		ShapeRowx:
+			push cx
+
+			push cx
+			push dx
+			push bx
+			call GetShapeSquare
+			cmp al, 0
+			je IsEmptyOrFalling
+			
+			add cx, [bp+8] ;x
+			add dx, [bp+6] ;y
+			push cx
+			push dx
+			call GetSquare
+
+			cmp ax, 0
+			je IsEmptyOrFalling
+
+			cmp ax, 80h
+			jge IsEmptyOrFalling
+
+			jmp ObjCantMov
+			
+			sub cx, [bp+8]
+			sub dx, [bp+6]
+
+			IsEmptyOrFalling:
+			pop cx
+		loop ShapeRowx
+		dec dx
+		cmp dx, 0
+	jne ShapeColy
+
+	mov ax, 1
+	jmp R
+
+	ObjCantMov:
+	pop cx
+	xor ax, ax
+
+
+	R:
+	pop dx
+	pop cx
+	pop bx
+	pop bp
+
+	ret 6
+endp CanDrawShapeWxy
+
+
+proc DrawShapeWxy
+	push bp
+	mov bp, sp
+
+	push bx
+	push cx
+	push dx
+
+	mov bx, [bp+4]
+	mov ax, 64
+	mul bx
+	mov bx, ax
+	add bx, offset Shape11
+
+	mov dx, 4
+	ShapeColyy:
+		mov cx, 4
+		ShapeRowxx:
+			push cx
+			push dx
+			push bx
+			call GetShapeSquare
+			cmp al, 0
+			je DontSett
+			
+			add cx, [bp+8] ;x
+			add dx, [bp+6] ;y
+			push cx
+			push dx
+			push ax
+			call SetSquare
+			
+			sub cx, [bp+8]
+			sub dx, [bp+6]
+
+			DontSett:
+		loop ShapeRowxx
+		dec dx
+		cmp dx, 0
+	jne ShapeColyy
+
+	pop dx
+	pop cx
+	pop bx
+	pop bp
+
+	ret 6
+endp DrawShapeWxy
 
 
 
@@ -732,7 +1045,9 @@ start:
 
     AnotherShape:
 	mov [FallRate], 5
-	call DrawRandomShape	
+	call DrawRandomShape
+	cmp ax, 0
+	je lose
 
 	call DrawBoard
 
@@ -754,6 +1069,10 @@ start:
 	call MakeBooardNotFall
 	call DropAllLines
 	jmp AnotherShape
+
+
+
+	lose:
 
 Exit:
     mov ax, 4C00h
