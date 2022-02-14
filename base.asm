@@ -568,6 +568,29 @@ system_time:
  endp Delay
 
 
+
+proc Droppp
+	push cx
+	mov cx, 21
+	droploop:
+	push 0
+	push 1
+	call CanObjMov
+	cmp ax, 0
+	je RRRRR
+
+	push 0
+	push 0
+	push 1
+	call movobj
+	loop droploop
+
+	RRRRR:
+	pop cx
+	ret
+endp Droppp
+
+
 proc HandleKeys
 	push bx
 
@@ -580,6 +603,11 @@ proc HandleKeys
 	mov ah, 00h
 	int 16h
 
+	cmp al, 32
+	jne nopee
+	call droppp
+
+	nopee:
 	cmp al, 97
 	jge ToUpper
 	jmp AlreadyUpper
@@ -621,19 +649,27 @@ proc HandleKeys
 
 	NotD:
 
-	cmp al, 87
+	cmp al, 82
+	jne NotR
+	; Is R
+
+	jmp startt
+
+	NotR:
+
+	cmp al, 83
 	jne NotW
 
-	; Is S
+	; Is w
 	mov [FallRate], 1
 	jmp NoNeedToMov
 
 	NotW:
 
-	cmp al, 83
+	cmp al, 87
 	jne NotS
 
-	; Is W
+	; Is s
 	call GetNextRotation
 	mov dx, [ShapeRotation]
 	mov [ShapeRotation], ax
@@ -854,6 +890,33 @@ proc MakeBooardNotFall
 	ret
 endp MakeBooardNotFall
 
+
+proc MakeBooardB
+	push cx
+	push dx
+
+	mov dx, 20 ;y
+	BBcol:
+		mov cx, 10 ;x
+		BBrow:
+
+		  push cx
+		  push dx
+
+		  xor ax, ax
+		  push ax
+		  call SetSquare
+
+		loop BBrow
+		dec dx
+		cmp dx, 0
+		jne BBcol
+	
+	pop dx
+	pop cx
+	ret
+endp MakeBooardB
+
 ; GetShapeSquare(x, y, shape address)
 proc GetShapeSquare
 	push bp
@@ -894,7 +957,7 @@ proc DrawRandomShape
 	int 21
 
 	mov ax, [CurrRandom]
-	rcl [CurrRandom], 3
+	rcl [CurrRandom], 1
 
 	xor ax, [CurrRandom]
 	xor ax, dx
@@ -1124,6 +1187,9 @@ start:
 	mov ax, 13h
 	int 10h
 
+	startt:
+	call MakeBooardB
+
 
     AnotherShape:
 	mov [FallRate], 5
@@ -1158,6 +1224,11 @@ start:
 
 
 	lose:
+	call HandleKeys
+	jmp lose
+
+
+
 
 Exit:
     mov ax, 4C00h
