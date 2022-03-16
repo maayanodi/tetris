@@ -199,6 +199,7 @@ Shapex dw 3
 Shapey dw 0
 ShapeRotation dw 0
 ShapeType dw 0
+score dw 0
 
 
 CODESEG
@@ -803,11 +804,26 @@ proc DropLine
 	push 1
 	call MovObj
 
+	
+
+;load the value stored
+    ; in variable d1
+	push ax
+    mov ax, [score]      
+     
+    ;print the value
+
+    CALL PRINT
+	pop ax
+
+
 	pop dx
 	pop cx
 	pop bx
 	pop bp
 
+
+	inc [score]
 	ret 2
 endp DropLine
 
@@ -957,16 +973,24 @@ proc DrawRandomShape
 	int 21
 
 	mov ax, [CurrRandom]
-	rcl [CurrRandom], 1
+	rcl [CurrRandom], 5
 
 	xor ax, [CurrRandom]
+	rcr [CurrRandom], 4
+	xor ax, [CurrRandom]
+	xor ax, cx
+	xor ax, bx
+	
+
+
 	xor ax, dx
 	mov [CurrRandom], ax
 
+
     mov dl, dh
-	mov ax, [ShapeType] ; remove
-	inc ax ; remove
+
 	add ax, dx
+	inc ax
 	xor dx, dx
 	mov cx, 7
 	div cx
@@ -1178,6 +1202,75 @@ proc DeleteFallingShape
 	ret
 endp DeleteFallingShape
 
+
+
+
+proc PRINT
+	mov ax, ax
+	push bx
+	push cx
+	push dx
+     
+    ;initialize count
+    mov cx,0
+    mov dx,0
+    label1:
+        ; if ax is zero
+        cmp ax,0
+        je print1     
+         
+        ;initialize bx to 10
+        mov bx,10       
+         
+        ; extract the last digit
+        div bx                 
+         
+        ;push it in the stack
+        push dx        
+         
+        ;increment the count
+        inc cx          
+         
+        ;set dx to 0
+        xor dx,dx
+        jmp label1
+    print1:
+        ;check if count
+        ;is greater than zero
+        cmp cx,0
+        je DONE
+         
+        ;pop the top of stack
+        pop dx
+         
+        ;add 48 so that it
+        ;represents the ASCII
+        ;value of digits
+        add dx,48
+         
+        ;interrupt to print a
+        ;character
+        mov ah,02h
+        int 21h
+         
+        ;decrease the count
+        dec cx
+        jmp print1
+
+		DONE:
+	
+	pop dx
+	pop cx
+	pop bx
+	ret
+endp PRINT
+
+
+
+
+
+
+
 start:	
     mov ax, @data
     mov ds, ax
@@ -1186,6 +1279,69 @@ start:
 	
 	mov ax, 13h
 	int 10h
+
+
+	mov ah, 2
+	mov dl, 'm'
+	int 21h
+
+	mov ah, 2
+	mov dl, 'a'
+	int 21h
+
+	mov ah, 2
+	mov dl, 'a'
+	int 21h
+
+	mov ah, 2
+	mov dl, 'y'
+	int 21h
+
+	mov ah, 2
+	mov dl, 'a'
+	int 21h
+
+
+	mov ah, 2
+	mov dl, 'n'
+	int 21h
+
+	mov ah, 2
+	mov dl, ' '
+	int 21h
+
+	mov ah, 2
+	mov dl, 'g'
+	int 21h
+
+
+	mov ah, 2
+	mov dl, 'e'
+	int 21h
+
+	mov ah, 2
+	mov dl, 'r'
+	int 21h
+
+	mov ah, 2
+	mov dl, 'e'
+	int 21h
+
+	mov ah, 2
+	mov dl, 'n'
+	int 21h
+
+	mov ah, 2
+	mov dl, 'r'
+	int 21h
+
+	mov ah, 2
+	mov dl, 'o'
+	int 21h
+
+	mov ah, 2
+	mov dl, 't'
+	int 21h
 
 	startt:
 	call MakeBooardB
