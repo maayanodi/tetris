@@ -199,7 +199,8 @@ Shapex dw 3
 Shapey dw 0
 ShapeRotation dw 0
 ShapeType dw 0
-score dw 0
+score dw 8
+scorestring db 48,49,50,51,52
 
 
 CODESEG
@@ -808,13 +809,12 @@ proc DropLine
 
 ;load the value stored
     ; in variable d1
-	push ax
-    mov ax, [score]      
-     
+
+    ;mov ax, [score]      
+    ;push ax
     ;print the value
 
-    CALL PRINT
-	pop ax
+    ;CALL PRINT
 
 
 	pop dx
@@ -1206,30 +1206,71 @@ endp DeleteFallingShape
 
 
 proc PRINT
-	mov ax, ax
+	push bp
+	mov bp, sp
+
 	push bx
 	push cx
 	push dx
-     
+
+	mov al, 1
+	mov bh, 0
+	mov bl, 00111011b
+	mov cx, 5
+	mov dl, 1
+	mov dh, 1
+	mov bp, offset scorestring
+	push es
+	push ds
+	pop es
+
+	mov ah, 13h
+	int 10h
+	pop es
+
+	pop dx
+	pop cx
+	pop bx
+	pop bp
+	ret
+endp PRINT
+
+
+
+proc ScoreToString
+	push bx
+	push cx
+	push dx
+
+	mov ax, [score]
+    
     ;initialize count
-    mov cx,0
+    mov cx,5
     mov dx,0
     label1:
         ; if ax is zero
         cmp ax,0
-        je print1     
+        je print1   
          
         ;initialize bx to 10
         mov bx,10       
          
         ; extract the last digit
-        div bx                 
-         
-        ;push it in the stack
-        push dx        
-         
+        div bx
+
+		add dx, 48
+
+		push bx
+        mov bx, cx
+		sub bx, 5
+		add bx, offset scorestring
+
+
+        mov [es:bx], dx
+		
+		pop bx
         ;increment the count
-        inc cx          
+        dec cx
          
         ;set dx to 0
         xor dx,dx
@@ -1237,37 +1278,29 @@ proc PRINT
     print1:
         ;check if count
         ;is greater than zero
-        cmp cx,0
+        cmp cx, 0
         je DONE
-         
-        ;pop the top of stack
-        pop dx
-         
-        ;add 48 so that it
-        ;represents the ASCII
-        ;value of digits
-        add dx,48
-         
-        ;interrupt to print a
-        ;character
-        mov ah,02h
-        int 21h
+
+		push bx
+        mov bx, 5
+		sub bx, cx
+		add bx, offset scorestring
+        
+		mov [es:bx], 48
+
+		pop bx
+        
          
         ;decrease the count
         dec cx
         jmp print1
 
 		DONE:
-	
 	pop dx
 	pop cx
 	pop bx
 	ret
-endp PRINT
-
-
-
-
+endp ScoreToString
 
 
 
@@ -1281,70 +1314,11 @@ start:
 	int 10h
 
 
-	mov ah, 2
-	mov dl, 'm'
-	int 21h
-
-	mov ah, 2
-	mov dl, 'a'
-	int 21h
-
-	mov ah, 2
-	mov dl, 'a'
-	int 21h
-
-	mov ah, 2
-	mov dl, 'y'
-	int 21h
-
-	mov ah, 2
-	mov dl, 'a'
-	int 21h
-
-
-	mov ah, 2
-	mov dl, 'n'
-	int 21h
-
-	mov ah, 2
-	mov dl, ' '
-	int 21h
-
-	mov ah, 2
-	mov dl, 'g'
-	int 21h
-
-
-	mov ah, 2
-	mov dl, 'e'
-	int 21h
-
-	mov ah, 2
-	mov dl, 'r'
-	int 21h
-
-	mov ah, 2
-	mov dl, 'e'
-	int 21h
-
-	mov ah, 2
-	mov dl, 'n'
-	int 21h
-
-	mov ah, 2
-	mov dl, 'r'
-	int 21h
-
-	mov ah, 2
-	mov dl, 'o'
-	int 21h
-
-	mov ah, 2
-	mov dl, 't'
-	int 21h
-
 	startt:
 	call MakeBooardB
+
+	call scoretostring
+	call PRINT
 
 
     AnotherShape:
