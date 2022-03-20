@@ -201,7 +201,14 @@ ShapeRotation dw 0
 ShapeType dw 0
 score dw 0
 scorestring db 48,49,50,51,52
-
+ScoreAsAString db "score:"
+Instructions db "Instructions:"
+moveright db "right=D"
+moveleft db "left=A"
+turn db "rotate=W"
+fast db "fast=S"
+fall db "drop=SPACE"
+newgame db "new game=R"
 
 CODESEG
 proc GetSquare
@@ -1205,11 +1212,30 @@ proc PRINT
 	push cx
 	push dx
 
+
+
+	mov al, 1
+	mov bh, 0
+	mov bl, 00111011b
+	mov cx, 6
+	mov dl, 1
+	mov dh, 1
+	mov bp, offset ScoreAsAString
+	push es
+	push ds
+	pop es
+
+	mov ah, 13h
+	int 10h
+	pop es
+
+
+
 	mov al, 1
 	mov bh, 0
 	mov bl, 00111011b
 	mov cx, 5
-	mov dl, 1
+	mov dl, 8
 	mov dh, 1
 	mov bp, offset scorestring
 	push es
@@ -1219,6 +1245,8 @@ proc PRINT
 	mov ah, 13h
 	int 10h
 	pop es
+
+
 
 	pop dx
 	pop cx
@@ -1275,6 +1303,119 @@ proc ScoreToString
 endp ScoreToString
 
 
+proc PrintInstructions
+	push bp
+	mov bp, sp
+
+	push bx
+	push cx
+	push dx
+
+
+
+	mov al, 1
+	mov bh, 0
+	mov bl, 00111011b
+	mov cx, 7
+	mov dl, 1
+	mov dh, 7
+	mov bp, offset moveright
+	push es
+	push ds
+	pop es
+
+	mov ah, 13h
+	int 10h
+	pop es
+
+
+	mov al, 1
+	mov bh, 0
+	mov bl, 00111011b
+	mov cx, 6
+	mov dl, 1
+	mov dh, 9
+	mov bp, offset moveleft
+	push es
+	push ds
+	pop es
+
+	mov ah, 13h
+	int 10h
+	pop es
+
+
+	mov al, 1
+	mov bh, 0
+	mov bl, 00111011b
+	mov cx, 8
+	mov dl, 1
+	mov dh, 11
+	mov bp, offset turn
+	push es
+	push ds
+	pop es
+
+	mov ah, 13h
+	int 10h
+	pop es
+
+
+	mov al, 1
+	mov bh, 0
+	mov bl, 00111011b
+	mov cx, 6
+	mov dl, 1
+	mov dh, 13
+	mov bp, offset fast
+	push es
+	push ds
+	pop es
+
+	mov ah, 13h
+	int 10h
+	pop es
+	
+	mov al, 1
+	mov bh, 0
+	mov bl, 00111011b
+	mov cx, 10
+	mov dl, 1
+	mov dh, 15
+	mov bp, offset fall
+	push es
+	push ds
+	pop es
+
+	mov ah, 13h
+	int 10h
+	pop es
+
+
+
+	mov al, 1
+	mov bh, 0
+	mov bl, 00111011b
+	mov cx, 10
+	mov dl, 1
+	mov dh, 17
+	mov bp, offset newgame
+	push es
+	push ds
+	pop es
+
+	mov ah, 13h
+	int 10h
+	pop es
+
+	pop dx
+	pop cx
+	pop bx
+	pop bp
+
+ret
+endp PrintInstructions
+
 
 start:	
     mov ax, @data
@@ -1288,11 +1429,12 @@ start:
 
 	startt:
 	call MakeBooardB
+	mov [score], 0
 
-	mov bx, offset scorestring
-	mov ax, [ds:bx]
+
+	call PrintInstructions
+
 	call ScoreToString
-	mov ax, [ds:bx]
 	call PRINT
 
 	
