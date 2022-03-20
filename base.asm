@@ -199,7 +199,7 @@ Shapex dw 3
 Shapey dw 0
 ShapeRotation dw 0
 ShapeType dw 0
-score dw 8
+score dw 0
 scorestring db 48,49,50,51,52
 
 
@@ -805,16 +805,6 @@ proc DropLine
 	push 1
 	call MovObj
 
-	
-
-;load the value stored
-    ; in variable d1
-
-    ;mov ax, [score]      
-    ;push ax
-    ;print the value
-
-    ;CALL PRINT
 
 
 	pop dx
@@ -824,6 +814,8 @@ proc DropLine
 
 
 	inc [score]
+	call scoretostring
+	call PRINT
 	ret 2
 endp DropLine
 
@@ -1245,57 +1237,37 @@ proc ScoreToString
 	mov ax, [score]
     
     ;initialize count
-    mov cx,5
+    mov cx,4
     mov dx,0
-    label1:
+    stringlabel:
         ; if ax is zero
-        cmp ax,0
-        je print1   
-         
-        ;initialize bx to 10
-        mov bx,10       
-         
+        ;cmp ax,0
+        ;jne isnziro
+		;mov dx, 0
+		;jmp next
+		;isnziro:
+
+        mov bx,10
+
         ; extract the last digit
+		mov dx, 0
         div bx
 
+		next:
 		add dx, 48
 
-		push bx
-        mov bx, cx
-		sub bx, 5
-		add bx, offset scorestring
+        mov bx, offset scorestring
+		add bx, cx
 
 
-        mov [es:bx], dx
+
+        mov [ds:bx], dl
 		
-		pop bx
+
         ;increment the count
-        dec cx
-         
-        ;set dx to 0
-        xor dx,dx
-        jmp label1
-    print1:
-        ;check if count
-        ;is greater than zero
-        cmp cx, 0
-        je DONE
-
-		push bx
-        mov bx, 5
-		sub bx, cx
-		add bx, offset scorestring
-        
-		mov [es:bx], 48
-
-		pop bx
-        
-         
-        ;decrease the count
-        dec cx
-        jmp print1
-
-		DONE:
+		loop stringlabel
+ 
+		DONE:	
 	pop dx
 	pop cx
 	pop bx
@@ -1317,10 +1289,13 @@ start:
 	startt:
 	call MakeBooardB
 
-	call scoretostring
+	mov bx, offset scorestring
+	mov ax, [ds:bx]
+	call ScoreToString
+	mov ax, [ds:bx]
 	call PRINT
 
-
+	
     AnotherShape:
 	mov [FallRate], 5
 	mov [Shapex], 3
