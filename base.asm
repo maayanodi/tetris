@@ -194,7 +194,8 @@ x dw 160
 y dw 100
 DelayDiv dw 0000h
 CurrRandom dw 1234h
-FallRate dw 5
+FallRate dw 6
+rfallrate dw 6
 Shapex dw 3
 Shapey dw 0
 ShapeRotation dw 0
@@ -209,6 +210,9 @@ turn db "rotate=W"
 fast db "fast=S"
 fall db "drop=SPACE"
 newgame db "new game=R"
+NextRandom dw 467
+timeforrandom dw 0
+
 
 CODESEG
 proc GetSquare
@@ -669,7 +673,14 @@ proc HandleKeys
 	cmp al, 83
 	jne NotW
 
-	; Is w
+	; Is S
+
+	
+	push ax
+	mov ax, [FallRate]
+	mov [rfallrate], ax
+	pop ax
+
 	mov [FallRate], 1
 	jmp NoNeedToMov
 
@@ -678,7 +689,7 @@ proc HandleKeys
 	cmp al, 87
 	jne NotS
 
-	; Is s
+	; Is w
 	call GetNextRotation
 	mov dx, [ShapeRotation]
 	mov [ShapeRotation], ax
@@ -823,6 +834,9 @@ proc DropLine
 	inc [score]
 	call scoretostring
 	call PRINT
+
+	call makefallfaster
+
 	ret 2
 endp DropLine
 
@@ -962,6 +976,25 @@ endp GetShapeSquare
 
 
 
+proc prg
+    push dx
+    xor dx, dx
+
+    mov ax, [NextRandom]
+    mov dx, 25173
+    imul dx
+
+    add  ax, 13849
+    xor  ax, 62832
+    mov  [NextRandom], ax
+
+    pop dx
+    ret
+endp prg
+
+
+
+
 proc DrawRandomShape
 	push bx
 	push cx
@@ -971,19 +1004,51 @@ proc DrawRandomShape
 	mov ah, 2ch
 	int 21
 
-	mov ax, [CurrRandom]
-	rcl [CurrRandom], 5
+	call prg
 
-	xor ax, [CurrRandom]
-	rcr [CurrRandom], 4
-	xor ax, [CurrRandom]
+	mov ax, [NextRandom]
+	rcl [NextRandom], 5
+
+	xor ax, [NextRandom]
+	rcr [NextRandom], 4
+	xor ax, [NextRandom]
 	xor ax, cx
 	xor ax, bx
 	
 
 
 	xor ax, dx
-	mov [CurrRandom], ax
+	mov [NextRandom], ax
+	push ax
+
+	call prg
+	call prg
+	call prg
+
+	inc [NextRandom]
+
+	call prg
+	call prg
+	call prg
+
+	dec [NextRandom]
+
+
+	call prg
+
+	inc [NextRandom]
+
+	call prg
+	call prg
+
+
+	dec [NextRandom]
+
+
+	pop ax
+	xor [NextRandom], ax
+
+	xor ax, [timeforrandom]
 
 
     mov dl, dh
@@ -1417,6 +1482,44 @@ ret
 endp PrintInstructions
 
 
+proc timeforrandomnum
+	push ax
+	push dx
+	mov ah, 2ch
+	int 21
+	mov [timeforrandom], dx
+	pop dx
+	pop ax
+	ret
+endp timeforrandomnum
+
+
+
+proc makefallfaster
+	push bx
+	push cx
+	push dx
+
+	mov ax, [score]
+	mov cx, 10
+	mov dx, 0
+	div cx
+	mov cx, 6
+	sub cx, ax
+	cmp cx, 2
+	js Donotchange
+
+	mov [rfallrate], cx
+
+
+	Donotchange:
+	pop dx
+	pop cx
+	pop bx
+	ret
+endp makefallfaster
+
+
 start:	
     mov ax, @data
     mov ds, ax
@@ -1430,6 +1533,9 @@ start:
 	startt:
 	call MakeBooardB
 	mov [score], 0
+	mov [FallRate], 6
+	mov [rFallRate], 6
+
 
 
 	call PrintInstructions
@@ -1439,7 +1545,12 @@ start:
 
 	
     AnotherShape:
-	mov [FallRate], 5
+
+	push ax
+	mov ax, [rfallrate]
+	mov [FallRate], ax
+	pop ax
+
 	mov [Shapex], 3
 	mov [Shapey], 1
 	mov [ShapeRotation], 0
@@ -1451,6 +1562,8 @@ start:
 	call DrawBoard
 
 	Tick:
+		 call timeforrandomnum
+
 		call Delay
 		push 0
 		push 1
