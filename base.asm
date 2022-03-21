@@ -214,6 +214,7 @@ fast db "fast=S"
 fall db "drop=SPACE"
 newgame db "new game=R"
 NextRandom dw 467
+color db 15
 
 
 CODESEG
@@ -839,6 +840,11 @@ proc DropLine
 
 	call makefallfaster
 
+	call Highscoreupdate
+	call highScoreToString
+	call PRINThighScore
+
+
 	ret 2
 endp DropLine
 
@@ -1240,10 +1246,10 @@ proc PRINT
 
 	mov al, 1
 	mov bh, 0
-	mov bl, 00111011b
+	mov bl, [color]
 	mov cx, 6
-	mov dl, 1
-	mov dh, 1
+	mov dl, 0
+	mov dh, 2
 	mov bp, offset ScoreAsAString
 	push es
 	push ds
@@ -1257,10 +1263,10 @@ proc PRINT
 
 	mov al, 1
 	mov bh, 0
-	mov bl, 00111011b
+	mov bl, [color]
 	mov cx, 5
-	mov dl, 8
-	mov dh, 1
+	mov dl, 7
+	mov dh, 2
 	mov bp, offset scorestring
 	push es
 	push ds
@@ -1339,10 +1345,10 @@ proc PrintInstructions
 
 	mov al, 1
 	mov bh, 0
-	mov bl, 00111011b
+	mov bl, [color]
 	mov cx, 7
-	mov dl, 1
-	mov dh, 7
+	mov dl, 0
+	mov dh, 19
 	mov bp, offset moveright
 	push es
 	push ds
@@ -1355,10 +1361,10 @@ proc PrintInstructions
 
 	mov al, 1
 	mov bh, 0
-	mov bl, 00111011b
+	mov bl, [color]
 	mov cx, 6
-	mov dl, 1
-	mov dh, 9
+	mov dl, 0
+	mov dh, 20
 	mov bp, offset moveleft
 	push es
 	push ds
@@ -1371,10 +1377,10 @@ proc PrintInstructions
 
 	mov al, 1
 	mov bh, 0
-	mov bl, 00111011b
+	mov bl, [color]
 	mov cx, 8
-	mov dl, 1
-	mov dh, 11
+	mov dl, 0
+	mov dh, 21
 	mov bp, offset turn
 	push es
 	push ds
@@ -1387,10 +1393,10 @@ proc PrintInstructions
 
 	mov al, 1
 	mov bh, 0
-	mov bl, 00111011b
+	mov bl, [color]
 	mov cx, 6
-	mov dl, 1
-	mov dh, 13
+	mov dl, 0
+	mov dh, 22
 	mov bp, offset fast
 	push es
 	push ds
@@ -1402,10 +1408,10 @@ proc PrintInstructions
 	
 	mov al, 1
 	mov bh, 0
-	mov bl, 00111011b
+	mov bl, [color]
 	mov cx, 10
-	mov dl, 1
-	mov dh, 15
+	mov dl, 0
+	mov dh, 23
 	mov bp, offset fall
 	push es
 	push ds
@@ -1419,10 +1425,10 @@ proc PrintInstructions
 
 	mov al, 1
 	mov bh, 0
-	mov bl, 00111011b
+	mov bl, [color]
 	mov cx, 10
-	mov dl, 1
-	mov dh, 17
+	mov dl, 0
+	mov dh, 24
 	mov bp, offset newgame
 	push es
 	push ds
@@ -1553,10 +1559,10 @@ proc PRINThighScore
 
 	mov al, 1
 	mov bh, 0
-	mov bl, 00111011b
+	mov bl, [color]
 	mov cx, 11
-	mov dl, 1
-	mov dh, 2
+	mov dl, 0
+	mov dh, 1
 	mov bp, offset highScoreAsAString
 	push es
 	push ds
@@ -1570,10 +1576,10 @@ proc PRINThighScore
 
 	mov al, 1
 	mov bh, 0
-	mov bl, 00111011b
+	mov bl, [color]
 	mov cx, 5
 	mov dl, 12
-	mov dh, 2
+	mov dh, 1
 	mov bp, offset highscorestring
 	push es
 	push ds
@@ -1610,8 +1616,11 @@ start:
 	mov [FallRate], 6
 	mov [rFallRate], 6
 
-	call resetnextrandom
+	call Highscoreupdate
+	call highScoreToString
+	call PRINThighScore
 
+	call resetnextrandom
 
 
 	call PrintInstructions
