@@ -215,6 +215,7 @@ fall db "drop=SPACE"
 newgame db "new game=R"
 NextRandom dw 467
 color db 15
+loststring db "lose!"
 
 
 CODESEG
@@ -1600,6 +1601,110 @@ endp PRINThighScore
 
 
 
+proc LoseInRed
+	push bp
+	mov bp, sp
+
+	push bx
+	push cx
+	push dx
+
+
+
+	mov al, 1
+	mov bh, 0
+	mov bl, 4
+	mov cx, 5
+	mov dl, 5
+	mov dh, 8
+	mov bp, offset loststring
+	push es
+	push ds
+	pop es
+
+	mov ah, 13h
+	int 10h
+	pop es
+
+
+	mov al, 1
+	mov bh, 0
+	mov bl, 4
+	mov cx, 5
+	mov dl, 30
+	mov dh, 8
+	mov bp, offset loststring
+	push es
+	push ds
+	pop es
+
+	mov ah, 13h
+	int 10h
+	pop es
+
+
+	pop dx
+	pop cx
+	pop bx
+
+	pop bp
+	ret
+endp LoseInRed
+
+
+
+proc LoseInBlack
+	push bp
+	mov bp, sp
+
+	push bx
+	push cx
+	push dx
+
+
+
+	mov al, 1
+	mov bh, 0
+	mov bl, 0
+	mov cx, 5
+	mov dl, 5
+	mov dh, 8
+	mov bp, offset loststring
+	push es
+	push ds
+	pop es
+
+	mov ah, 13h
+	int 10h
+	pop es
+
+
+	mov al, 1
+	mov bh, 0
+	mov bl, 0
+	mov cx, 5
+	mov dl, 30
+	mov dh, 8
+	mov bp, offset loststring
+	push es
+	push ds
+	pop es
+
+	mov ah, 13h
+	int 10h
+	pop es
+
+
+	pop dx
+	pop cx
+	pop bx
+	
+	pop bp
+
+	ret
+endp LoseInBlack
+
+
 start:	
     mov ax, @data
     mov ds, ax
@@ -1627,6 +1732,8 @@ start:
 
 	call ScoreToString
 	call PRINT
+	
+	call LoseInBlack
 
 	
     AnotherShape:
@@ -1670,6 +1777,8 @@ start:
 	call Highscoreupdate
 	call highScoreToString
 	call PRINThighScore
+	
+	call LoseInRed
 
 	loseloop:
 	call HandleKeys
