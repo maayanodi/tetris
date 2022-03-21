@@ -201,8 +201,11 @@ Shapey dw 0
 ShapeRotation dw 0
 ShapeType dw 0
 score dw 0
+highscore dw 0
 scorestring db 48,49,50,51,52
+highscorestring db 48,49,50,51,52
 ScoreAsAString db "score:"
+HighScoreAsAString db "high score:"
 Instructions db "Instructions:"
 moveright db "right=D"
 moveleft db "left=A"
@@ -211,7 +214,6 @@ fast db "fast=S"
 fall db "drop=SPACE"
 newgame db "new game=R"
 NextRandom dw 467
-timeforrandom dw 0
 
 
 CODESEG
@@ -1439,17 +1441,6 @@ ret
 endp PrintInstructions
 
 
-proc timeforrandomnum
-	push ax
-	push dx
-	mov ah, 2ch
-	int 21
-	mov [timeforrandom], dx
-	pop dx
-	pop ax
-	ret
-endp timeforrandomnum
-
 
 
 proc makefallfaster
@@ -1486,6 +1477,120 @@ proc resetnextrandom
 	xor ax, [NextRandom]
 	ret
 endp resetnextrandom
+
+
+
+proc Highscoreupdate
+	mov ax, [score]
+	cmp [highscore], ax
+	jge doesnotwin
+
+	mov ax, [score]
+	mov [highscore], ax
+
+	doesnotwin:
+	ret
+endp Highscoreupdate
+
+
+
+proc highScoreToString
+	push bx
+	push cx
+	push dx
+
+	mov ax, [highscore]
+    
+    ;initialize count
+    mov cx,4
+    mov dx,0
+    highscorestringlabel:
+        ; if ax is zero
+        ;cmp ax,0
+        ;jne isnziro
+		;mov dx, 0
+		;jmp next
+		;isnziro:
+
+        mov bx,10
+
+        ; extract the last digit
+		mov dx, 0
+        div bx
+
+		nnext:
+		add dx, 48
+
+        mov bx, offset highscorestring
+		add bx, cx
+
+
+
+        mov [ds:bx], dl
+		
+
+        ;increment the count
+		loop highscorestringlabel
+ 
+		highscoreDONE:	
+	pop dx
+	pop cx
+	pop bx
+	ret
+endp highScoreToString
+
+
+
+proc PRINThighScore
+	push bp
+	mov bp, sp
+
+	push bx
+	push cx
+	push dx
+
+
+
+	mov al, 1
+	mov bh, 0
+	mov bl, 00111011b
+	mov cx, 11
+	mov dl, 1
+	mov dh, 2
+	mov bp, offset highScoreAsAString
+	push es
+	push ds
+	pop es
+
+	mov ah, 13h
+	int 10h
+	pop es
+
+
+
+	mov al, 1
+	mov bh, 0
+	mov bl, 00111011b
+	mov cx, 5
+	mov dl, 12
+	mov dh, 2
+	mov bp, offset highscorestring
+	push es
+	push ds
+	pop es
+
+	mov ah, 13h
+	int 10h
+	pop es
+
+
+
+	pop dx
+	pop cx
+	pop bx
+	pop bp
+	ret
+endp PRINThighScore
 
 
 
@@ -1533,8 +1638,6 @@ start:
 	call DrawBoard
 
 	Tick:
-		 call timeforrandomnum
-
 		call Delay
 		push 0
 		push 1
@@ -1555,8 +1658,13 @@ start:
 
 
 	lose:
+	call Highscoreupdate
+	call highScoreToString
+	call PRINThighScore
+
+	loseloop:
 	call HandleKeys
-	jmp lose
+	jmp loseloop
 
 
 
