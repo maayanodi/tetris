@@ -1005,50 +1005,7 @@ proc DrawRandomShape
 	int 21
 
 	call prg
-
 	mov ax, [NextRandom]
-	rcl [NextRandom], 5
-
-	xor ax, [NextRandom]
-	rcr [NextRandom], 4
-	xor ax, [NextRandom]
-	xor ax, cx
-	xor ax, bx
-	
-
-
-	xor ax, dx
-	mov [NextRandom], ax
-	push ax
-
-	call prg
-	call prg
-	call prg
-
-	inc [NextRandom]
-
-	call prg
-	call prg
-	call prg
-
-	dec [NextRandom]
-
-
-	call prg
-
-	inc [NextRandom]
-
-	call prg
-	call prg
-
-
-	dec [NextRandom]
-
-
-	pop ax
-	xor [NextRandom], ax
-
-	xor ax, [timeforrandom]
 
 
     mov dl, dh
@@ -1520,6 +1477,18 @@ proc makefallfaster
 endp makefallfaster
 
 
+
+proc resetnextrandom
+	mov ax, [NextRandom]
+	push ax
+	call prg
+	pop ax
+	xor ax, [NextRandom]
+	ret
+endp resetnextrandom
+
+
+
 start:	
     mov ax, @data
     mov ds, ax
@@ -1535,6 +1504,8 @@ start:
 	mov [score], 0
 	mov [FallRate], 6
 	mov [rFallRate], 6
+
+	call resetnextrandom
 
 
 
